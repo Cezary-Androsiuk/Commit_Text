@@ -6,6 +6,7 @@
 #include <fstream>
 #include <thread>
 #include <chrono>
+#include <filesystem>
 
 // g++ main.cpp -o main.exe && .\main.exe
 
@@ -76,11 +77,24 @@ namespace Month
     constexpr monthDay MonthDays[12] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 };
 
+std::string to_str(int value)
+{
+    if( value < 0) return "";
+    else if( value < 10)
+        return std::string("0") + std::to_string(value);
+    else
+        return std::to_string(value);
+}
+
 class Date
 {
     int year;
     Month::MonthName month;
     monthDay day;
+
+    uint8 hour;
+    uint8 minute;
+    uint8 seconds;
 
     void increment()
     {
@@ -107,13 +121,15 @@ class Date
 public:
     Date()
     {
-
         std::time_t t = std::time(nullptr);
         std::tm *now = std::localtime(&t);
 
         this->day = now->tm_mday;
         this->month = static_cast<Month::MonthName>(now->tm_mon + 1);
         this->year = now->tm_year + 1900;
+        this->hour = now->tm_hour;
+        this->minute = now->tm_min;
+        this->seconds = now->tm_sec;
     }
 
     Date(int year, Month::MonthName month, monthDay day)
@@ -121,6 +137,12 @@ public:
         this->year = year;
         this->month = month;
         this->day = day;
+
+        std::time_t t = std::time(nullptr);
+        std::tm *now = std::localtime(&t);
+        this->hour = now->tm_hour;
+        this->minute = now->tm_min;
+        this->seconds = now->tm_sec;
     }
 
     Date(int year, std::string month, monthDay day)
@@ -144,6 +166,12 @@ public:
             this->month = Month::January;
         }
         this->day = day;
+
+        std::time_t t = std::time(nullptr);
+        std::tm *now = std::localtime(&t);
+        this->hour = now->tm_hour;
+        this->minute = now->tm_min;
+        this->seconds = now->tm_sec;
     }
 
     void print() const
@@ -169,7 +197,12 @@ public:
 
     std::string getDate() const
     {
-        return std::to_string(this->year) + "-" + std::to_string(this->month) + "-" + std::to_string(this->day);
+        return to_str(this->year) + "-" + to_str(this->month) + "-" + to_str(this->day);
+    }
+    
+    std::string getTime() const
+    {
+        return to_str(this->hour) + "-" + to_str(this->minute) + "-" + to_str(this->seconds);
     }
 
     Date &operator++()
@@ -354,7 +387,7 @@ public:
     }
 };
 
-int makeMyDayAction(Date date)
+std::string makeMyDayAction(Date date)
 {
     Text text;
     text.print();
@@ -366,17 +399,17 @@ int makeMyDayAction(Date date)
         if (state == Text::BEFORE_START)
         {
             printf("before start\n");
-            return -1;
+            return "9"; //"Before start date";
         }
         else if (state == Text::NONE_FIELD_AND_SETTED)
         {
             printf("empty\n");
-            return -2;
+            return "1"; //"Today's field should remain empty";
         }
         else if (state == Text::VALUE_FIELD_AND_FILLED_MAX)
         {
             printf("max\n");
-            return -3;
+            return "2"; //"Today's field has already been filled";
         }
 
         text.print();
@@ -388,18 +421,57 @@ int makeMyDayAction(Date date)
         std::system("git add text");
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         std::string commit("git commit -m \"");
-        commit += date.getDate() + " Index: " + std::to_string(i) + "\"";
+        commit += date.getDate() + " " + date.getTime() + " Index: " + to_str(i) + "\"";
         std::system(commit.c_str());
     }
     // text.print();
     std::system("git push");
-    return 0;
+    return " "; //"Today's field has been filled correctly";
 }
+
+
+class PreventRun
+{
+    const std::string running_file = "program_is_running";
+public:
+    PreventRun(){
+        if(std::filesystem::exists(this->running_file)){
+            std::ofstream file("scheduler.log", std::ios::app);
+            file << "(prevented run) ";
+            file.close();
+            exit(0);
+        }
+        std::ofstream file(this->running_file);
+        file << "hi :)\n";
+        file.close();
+
+    }
+    ~PreventRun(){
+        if(std::filesystem::exists(this->running_file))
+            std::filesystem::remove(this->running_file);
+    }
+};
+
+
+
 
 int main()
 {
-    Date date;//(2024, Month::January, 28);
-    makeMyDayAction(date);
+    PreventRun prevent_run;
+    Date date;
+    std::ofstream file;
+
+    file.open("scheduler.log", std::ios::app);
+    file << "start(" << date.getDate() << " " << date.getTime() << ") - ";
+    file.close();
+
+    std::string result = makeMyDayAction(date);
+
+    file.open("scheduler.log", std::ios::app);
+    file << "(" << result << ") - ";
+    file << "end(" << date.getDate() << " " << date.getTime() << ")\n";
+    file.close();
+    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 }
 
 /*
