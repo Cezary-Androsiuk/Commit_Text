@@ -14,7 +14,7 @@ constexpr const char *run_file_name = "main.exe";
 constexpr const char *terminate_file_name = "Stop_autorun_script.tmp";
 
 // run program delay in minutes
-#define RUN_DELAY 120
+#define RUN_DELAY 60*5 /* 5 hours */
 
 bool testIfExtit(){
     // after finding a file, wait and then check again
