@@ -31,7 +31,7 @@ int main(){
     }
 
     while(std::filesystem::exists(FILE)){
-        printf("waiting (10s) for autorun program... \n");
+        printf("waiting (10s) for autorun_sn.exe response... \n");
         std::this_thread::sleep_for(std::chrono::seconds(10));
     }
 
