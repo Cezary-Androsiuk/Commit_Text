@@ -1,34 +1,17 @@
-#include <cstdio>
-#include <cstdlib>
 #include <string>
-#include <fstream>
-#include <thread>
-#include <chrono>
 
 #include "PreventRun.hpp"
 #include "func.hpp"
-
-// compile:
-// g++ main.cpp Date.cpp func.cpp PreventRun.cpp Text.cpp -o ..\..\main.exe
+#include "../json_XD.hpp"
 
 int main()
 {
-    PreventRun prevent_run;
+    PreventRun prevent_run(LOG_FILE);
     Date date;
-    std::ofstream file;
 
-    file.open("scheduler.log", std::ios::app);
-    file << "start(" << date.getDate() << " " << date.getTime() << ") - ";
-    file.close();
-
-    std::string result = makeMyDayAction(date);
-
-    file.open("scheduler.log", std::ios::app);
-    file << "(" << result << ") - ";
-    file << "end(" << date.getDate() << " " << date.getTime() << ")\n";
-    file.close();
-    // std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-    // std::system("pause");
+    std::string resultStatus = makeMyDayAction(date, FORMULA_FILE);
+    logStatus(LOG_FILE, resultStatus, date);
+    
 }
 
 /*
@@ -37,5 +20,7 @@ int main()
 I will just leave it as it is."
 
 - Czarek from the future: "I've just cleaned up a little bit by moving functions and classes to other files. You are welcome."
+
+- Czarek from even further in the future: "Well, DeepL AI helped but I further improved the code and described probably everything." 
 
 */

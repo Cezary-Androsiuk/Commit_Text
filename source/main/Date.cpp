@@ -32,6 +32,28 @@ void Date::increment()
     }
 }
 
+Month::MonthName Date::monthNameFromString(const std::string &month_str)
+{
+    if(false); // following code will look nicer and even UwU
+    else if (month_str == "January")    return Month::January;
+    else if (month_str == "February")   return Month::February;
+    else if (month_str == "March")      return Month::March;
+    else if (month_str == "April")      return Month::April;
+    else if (month_str == "May")        return Month::May;
+    else if (month_str == "June")       return Month::June;
+    else if (month_str == "July")       return Month::July;
+    else if (month_str == "August")     return Month::August;
+    else if (month_str == "September")  return Month::September;
+    else if (month_str == "October")    return Month::October;
+    else if (month_str == "November")   return Month::November;
+    else if (month_str == "December")   return Month::December;
+    else
+    {
+        printf("Unknown '%s' month\n", month_str.c_str());
+        return Month::January;
+    }
+}
+
 Date::Date()
 {
     std::time_t t = std::time(nullptr);
@@ -45,7 +67,7 @@ Date::Date()
     this->seconds = now->tm_sec;
 }
 
-Date::Date(int year, Month::MonthName month, monthDay day)
+Date::Date(int year, Month::MonthName month, Month::monthDay day)
 {
     this->year = year;
     this->month = month;
@@ -58,53 +80,16 @@ Date::Date(int year, Month::MonthName month, monthDay day)
     this->seconds = now->tm_sec;
 }
 
-Date::Date(int year, std::string month, monthDay day)
-{
-    this->year = year;
-    if (month == "January")
-        this->month = Month::January;
-    else if (month == "February")
-        this->month = Month::February;
-    else if (month == "March")
-        this->month = Month::March;
-    else if (month == "April")
-        this->month = Month::April;
-    else if (month == "May")
-        this->month = Month::May;
-    else if (month == "June")
-        this->month = Month::June;
-    else if (month == "July")
-        this->month = Month::July;
-    else if (month == "August")
-        this->month = Month::August;
-    else if (month == "September")
-        this->month = Month::September;
-    else if (month == "October")
-        this->month = Month::October;
-    else if (month == "November")
-        this->month = Month::November;
-    else if (month == "December")
-        this->month = Month::December;
-    else
-    {
-        printf("Unknown '%s' month\n", month);
-        this->month = Month::January;
-    }
-    this->day = day;
-
-    std::time_t t = std::time(nullptr);
-    std::tm *now = std::localtime(&t);
-    this->hour = now->tm_hour;
-    this->minute = now->tm_min;
-    this->seconds = now->tm_sec;
-}
+Date::Date(int year, std::string month, Month::monthDay day)
+    : Date(year, Date::monthNameFromString(month), day)
+{}
 
 void Date::print() const
 {
     printf("Date: %d %d %d\n", this->day, this->month, this->year);
 }
 
-int Date::getDays() const
+int Date::getYearDay() const
 {
     int days = 0;
     for (int i = 0; i < 12; i++)
@@ -142,5 +127,3 @@ Date Date::operator++(int)
     this->increment();
     return tmp;
 }
-
-Date start_date(2024, Month::January, 28);

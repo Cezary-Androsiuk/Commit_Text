@@ -1,54 +1,72 @@
 #include "func.hpp"
 
-std::string makeMyDayAction(Date date)
+void logStatus(const std::string &logFile, const std::string &statusToLog, const Date &date)
 {
-    Text text;
-    if (text.isTextFileMissing())
+    std::ofstream file;
+
+    std::string time = date.getDate() + " " + date.getTime();
+
+    file.open(logFile, std::ios::app);
+    file << "start(" << time << ") - (" << statusToLog << ") - end(" << time << ")\n";
+    file.close();
+}
+
+std::string makeMyDayAction(const Date &date, const std::string &formulaFile)
+{
+    Formula formula(formulaFile);
+    formula.load();
+
+    // check that the file containing the formula exists
+    if (formula.isTextFileMissing())
     {
-        printf("makeMyDayAction() Terminated cause missing text file\n");
-        return "missing text file";
+        printf("makeMyDayAction() Terminated cause missing formula text file\n");
+        return "missing formula text file";
     }
-    text.print();
+
+    formula.print();
     printf("\n\n");
 
     for (int i = 0; i < 100; i++)
     {
-        int state = text.test(date);
-        if (state == Text::BEFORE_START)
+        int state = formula.update(START_DATE, date);
+        if (state == Formula::BEFORE_START)
         {
             printf("before start\n");
             return "9"; //"Before start date";
         }
-        else if (state == Text::NONE_FIELD_AND_SETTED)
+        else if(state == Formula::AFTER_END)
         {
-            printf("empty\n");
+            printf("after end - script could be terminated\n");
+            return "8";
+        }
+        else if (state == Formula::NONE_FIELD_AND_SETTED)
+        {
+            printf("empty field\n");
             return "1"; //"Today's field should remain empty";
         }
-        else if (state == Text::VALUE_FIELD_AND_FILLED_MAX)
+        else if (state == Formula::VALUE_FIELD_AND_FILLED_MAX)
         {
-            printf("max\n");
+            printf("field maxed\n");
             return "2"; //"Today's field has already been filled";
         }
 
-        text.print();
+        formula.print();
         printf("\n\n");
 
-        text.setState();
+        formula.save();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        std::system("git add text");
+        std::string add("git add \"");
+        add += formulaFile + "\"";
+        std::system(add.c_str());
+        
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
         std::string commit("git commit -m \"");
         commit += date.getDate() + " " + date.getTime() + " Index: " + to_str(i) + "\"";
         std::system(commit.c_str());
     }
-    // text.print();
+    
     std::system("git push");
     return " "; //"Today's field has been filled correctly";
-}
-
-void makeTaskScheduler()
-{
-    const std::filesystem::path autorun_path(R"(C:\Users\cezar\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup)");
-    const std::string autorun_file(R"(task_scheduler_for_send_nudes_git_repo.exe)");
 }

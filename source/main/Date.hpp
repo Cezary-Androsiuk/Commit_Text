@@ -7,51 +7,6 @@
 
 std::string to_str(int value);
 
-// that was a nice idea and I do not want to remove this
-// namespace Month{
-//     static constexpr uint8 January   = 31;
-//     static constexpr uint8 February  = 29;
-//     static constexpr uint8 March     = 31;
-//     static constexpr uint8 April     = 30;
-//     static constexpr uint8 May       = 31;
-//     static constexpr uint8 June      = 30;
-//     static constexpr uint8 July      = 31;
-//     static constexpr uint8 August    = 31;
-//     static constexpr uint8 September = 30;
-//     static constexpr uint8 October   = 31;
-//     static constexpr uint8 November  = 30;
-//     static constexpr uint8 December  = 31;
-//     static constexpr const uint8* Months[12] = {
-//         &January,
-//         &February,
-//         &March,
-//         &April,
-//         &May,
-//         &June,
-//         &July,
-//         &August,
-//         &September,
-//         &October,
-//         &November,
-//         &December
-//     };
-//     static constexpr const char* Months_names[12] = {
-//         "January",
-//         "February",
-//         "March",
-//         "April",
-//         "May",
-//         "June",
-//         "July",
-//         "August",
-//         "September",
-//         "October",
-//         "November",
-//         "December"
-//     };
-// };
-
-typedef unsigned char monthDay;
 typedef unsigned char uint8;
 
 namespace Month
@@ -71,31 +26,44 @@ namespace Month
         November,
         December
     };
+
+    typedef unsigned char monthDay;
     constexpr monthDay MonthDays[12] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 };
 
+/**
+ * @brief The Date class addresses the needs of the algorithm, 
+ * such as easily incrementing days and creating variables with 
+ * a specific date in a simple way. It also provides some additional functionality.
+ * 
+ */
 class Date
 {
     int year;
     Month::MonthName month;
-    monthDay day;
+    Month::monthDay day;
 
     uint8 hour;
     uint8 minute;
     uint8 seconds;
 
     void increment();
-
+    static Month::MonthName monthNameFromString(const std::string &month_str);
 public:
     Date();
 
-    Date(int year, Month::MonthName month, monthDay day);
+    Date(int year, Month::MonthName month, Month::monthDay day);
 
-    Date(int year, std::string month, monthDay day);
+    Date(int year, std::string month, Month::monthDay day);
 
     void print() const;
 
-    int getDays() const;
+    /**
+     * @brief Get the day (in year scale)
+     * 
+     * @return int 
+     */
+    int getYearDay() const;
 
     std::string getDate() const;
 
