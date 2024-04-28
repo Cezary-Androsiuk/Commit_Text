@@ -133,7 +133,7 @@ int Formula::update(const Date &start_date, const Date &date)
     }
     else // digits
     {
-        uint8 digit = this->getDigitFromText(column, row);
+        digit = this->getDigitFromText(column, row);
         // check if field in formula was filled
         if (digit >= 99)
             return VALUE_FIELD_AND_FILLED_MAX;
